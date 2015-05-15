@@ -11,6 +11,7 @@ var requestToken = "";
 var accessToken = "";
 var clientId = "547116458961-7tsfii9mvd5cl5r9digh537n7vs0vqji.apps.googleusercontent.com";
 var clientSecret = "v2Oo8y7W1M1lbM66vog4Mb6F";
+var API_KEY = "AIzaSyBIgvJicny7Lult5CEGDYydJHmANgBIFxQ"
 
 var USER_EMAIL = "user@gmail.com"; 
 
@@ -55,12 +56,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
-  .state('tab.chats', {
+  .state('tab.product', {
       cache: false, 
-      url: '/chats',
+      url: '/product',
       views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html'
+        'tab-product': {
+          templateUrl: 'templates/tab-product.html'
         }
       }
     })
