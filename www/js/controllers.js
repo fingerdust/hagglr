@@ -8,9 +8,7 @@ app.controller('ChatsCtrl', function($scope, Chats) {
   }
 }); 
 
-app.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
-}); 
+
 
 app.controller('AccountCtrl', function($scope, $http, $location) {
     $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -75,7 +73,7 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, Bar
 	this.scanBarcode = function() {
 	    $cordovaBarcodeScanner.scan().then(function(imageData) {
 	    	BarcodeService.setBarcode(imageData.text); 
-	    	$state.go('tab.chats'); 
+	    	$state.go('tab.product'); 
 	   	}, function(error) {
 	        alert("Error. Could not read barcode."); 
 	    });
@@ -83,7 +81,7 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, Bar
 }); 
 
 
-app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $http, BarcodeService){
+app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $http, BarcodeService, $cordovaGeolocation){
 	var barcode = BarcodeService.getBarcode(); 
     $http({
 		method: "post",
@@ -99,4 +97,26 @@ app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $ht
 		$scope.pTitle = data.title[0]; 
 		$scope.imageUrl = data.imageUrl[0];
 	});
+    $scope.showNearby = function(){
+        var posOptions = {timeout: 10000, enableHighAccuracy: true};
+        var lat; 
+        var longi; 
+        var latLong; 
+        $cordovaGeolocation
+            .getCurrentPosition(posOptions)
+            .then(function (position) {
+              lat = position.coords.latitude;
+              longi = position.coords.longitude;
+              latLong = lat + "," + longi; 
+                $http.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance&type=store&location=" +
+                    latLong + "&key=" + API_KEY)
+                        .success(function(data){
+                            $scope.results = data.results
+                        }).error(function(err){
+                            alert(err); 
+                });
+            }, function(err) {
+              alert(err); 
+        });
+    }
 }); 
