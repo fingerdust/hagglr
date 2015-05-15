@@ -3,6 +3,7 @@
     <div ng-controller="ProductController as product">
       <p ng-model="pTitle">{{pTitle}}</p>
       <img ng-model="imageUrl" ng-src="{{imageUrl}}" />
+      <p ng-model="price">{{price}}</p> 
       <button ng-click="showNearby()" class="button button-block button-balanced">Show Nearby store</button>
       <p ng-repeat="result in results">{{result.name}}</p>
     </div>

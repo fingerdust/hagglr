@@ -96,6 +96,11 @@ app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $ht
 	.success(function (data) {
 		$scope.pTitle = data.title[0]; 
 		$scope.imageUrl = data.imageUrl[0];
+        if(data.price[0] === "N"){
+            $scope.price = "Could not find an Amazon price for the selected item"
+        }else{
+            $scope.price = accounting.formatMoney((accounting.unformat(data.price[0]) * 1.37), "€", 2, ".", ",");    
+        }
 	});
     $scope.showNearby = function(){
         var posOptions = {timeout: 10000, enableHighAccuracy: true};
