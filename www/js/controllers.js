@@ -43,30 +43,20 @@ app.controller('AccountCtrl', function($scope, $http, $location) {
     var initUserData = function(accessToken){
     	$http.get("https://www.googleapis.com/userinfo/email?alt=json&access_token=" + accessToken)
     		.success(function(data){
+                alert("inside init"); 
     			USER_EMAIL = data.data.email; 
                 alert(USER_EMAIL); 
-    		})
+                var data = {email: data.data.email}; 
+                var res = $http.post('http://ec2-52-11-37-35.us-west-2.compute.amazonaws.com/Data/index.php', data);    
+                res.success(function(data, status, headers, config) {
+                    console.log("User email saved to database"); 
+                });              		
+            })
     		.error(function(data, status){
     			alert("ERROR:" + data); 
     		}); 
     }
-    /*
-    var adduser = function(){
-        $http({
-            method: "post",
-            url: "http://127.0.0.1/adduser.php", 
-            data: {
-                email: USER_EMAIL
-            }
-        })
-        .success(function(data) {
-            alert(data); 
-        })
-        .error(function(data){
-            alert(data)
-        }); 
-    }
-    */
+    
 });
 
 app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, BarcodeService, $state){
