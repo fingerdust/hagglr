@@ -5,6 +5,15 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
+
+// OAuth settings 
+var requestToken = "";
+var accessToken = "";
+var clientId = "547116458961-7tsfii9mvd5cl5r9digh537n7vs0vqji.apps.googleusercontent.com";
+var clientSecret = "v2Oo8y7W1M1lbM66vog4Mb6F";
+
+var USER_EMAIL = "user@gmail.com"; 
+
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'ngCordova', 'ui.router'])
 
 .run(function($ionicPlatform) {
@@ -46,7 +55,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
-
   .state('tab.chats', {
       cache: false, 
       url: '/chats',
@@ -77,7 +85,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/dash');
+  $urlRouterProvider.otherwise('/tab/account');
 
 })
 
