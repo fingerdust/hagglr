@@ -1,11 +1,21 @@
 <ion-view view-title="Product">
   <ion-content>
     <div ng-controller="ProductController as product">
-      <p ng-model="pTitle">{{pTitle}}</p>
-      <img ng-model="imageUrl" ng-src="{{imageUrl}}" />
-      <p ng-model="price">{{price}}</p> 
-      <button ng-click="showNearby()" class="button button-block button-balanced">Show Nearby store</button>
-      <p ng-repeat="result in results">{{result.name}}</p>
+    	<div class="list card">
+    		<div class="item item-text-wrap">
+    			<h3>{{pTitle}}</h3>
+    		</div>
+    		<div class="item item-body">
+    			<img width="60%" class="full-image" ng-src="{{imageUrl}}" />
+    			<p>{{description}}</p>
+    		</div>
+
+
+
+
+
+
+      
     </div>
 
   </ion-content>

@@ -1,5 +1,43 @@
 <ion-view view-title="Scan a Product">
-  <ion-content ng-controller="ScannerController as scanner" class="padding">
-    <button class="button button-block button-positive" ng-click="scanner.scanBarcode()">Scan</button>
-  </ion-content>
+  	<ion-content ng-controller="ScannerController as scanner" class="padding">
+	    
+	    <button class="button button-block button-positive" ng-click="scanner.scanBarcode()">Scan</button>
+	    
+	    <div ng-show ="infocard" class="card">
+	    	<div ng-model="pTitle" class="item item-text-wrap"> 
+	    		{{pTitle}}
+	    		<p ng-show="showPrice">Price entered: €{{price}}</p> 
+	    		<p ng-show="showNewLocation">Location: {{location.name}}</p> 
+	    	</div>
+	    </div>
+
+
+	    <div ng-show="priceEntry" class="list">
+	    	Please enter the price you see:
+			<div class="item item-input-inset">
+    			<label class="item-input-wrapper">
+      				<input type="text" id="price" ng-model="money" currency-input size="200" placeholder="Price"></input>
+    			</label>
+    			<button ng-click="submitPrice()" class="button button-small">
+     				<h3>Go</h3>
+    			</button>
+			</div>
+		</div>
+
+
+	    <div ng-show="showLocation">
+	    	Please select your current location: 
+	    	<label class="item item-input item-select">
+		    	<div class="input-label">
+	      			Location
+	    		</div>
+	    	
+				<select ng-model="location" ng-click="newLocation()" ng-options="result.name for result in results | limitTo: 6" >
+					
+				</select>
+			</label>
+	    </div>
+
+
+	</ion-content>
 </ion-view>
