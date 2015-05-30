@@ -10,7 +10,7 @@ app.controller('ChatsCtrl', function($scope, Chats) {
 
 
 
-app.controller('AccountCtrl', function($scope, $http, $location) {
+app.controller('AccountCtrl', function($scope, $http, $state) {
     $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
  
     $scope.login = function() {
@@ -23,7 +23,7 @@ app.controller('AccountCtrl', function($scope, $http, $location) {
                     .success(function(data) {
                         accessToken = data.access_token;
                         initUserData(accessToken); 
-                        $location.path("/account");
+                        $state.go("tab.dash");
                         
                     })
                     .error(function(data, status) {
@@ -43,14 +43,7 @@ app.controller('AccountCtrl', function($scope, $http, $location) {
     var initUserData = function(accessToken){
     	$http.get("https://www.googleapis.com/userinfo/email?alt=json&access_token=" + accessToken)
     		.success(function(data){
-                alert("inside init"); 
-    			USER_EMAIL = data.data.email; 
-                alert(USER_EMAIL); 
-                var data = {email: data.data.email}; 
-                var res = $http.post(BASE_URL + 'Data/index.php', data);    
-                res.success(function(data, status, headers, config) {
-                    console.log("User email saved to database"); 
-                });              		
+    			USER_EMAIL = data.data.email;              		
             })
     		.error(function(data, status){
     			alert("ERROR:" + data); 
@@ -59,12 +52,15 @@ app.controller('AccountCtrl', function($scope, $http, $location) {
     
 });
 
-app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $state, $ionicLoading, $http, $cordovaGeolocation){
+app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $state, $ionicLoading, $http, $cordovaGeolocation, $state){
     $scope.showLocationResult = false;
+    product.barcode = "B00QVGFOBM"; // Remove barcode string 
 	this.scanBarcode = function() {
-	    $cordovaBarcodeScanner.scan().then(function(imageData) {
+        
+	    /*REMOVE $cordovaBarcodeScanner.scan().then(function(imageData) {
             $ionicLoading.show(loadingOptions);
-	    	var barcode = imageData.text; 
+            $scope.reset(); 
+	    	product.barcode = imageData.text; REMOVE*/
 	    	    $http({
                     method: "post",
                     url: BASE_URL + "Logic/amazon/index.php", 
@@ -92,9 +88,9 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                 .error(function(data){
                     alert("Could not find product information"); 
                 });
-	   	}, function(error) {
+	   	/*REMOVE}, function(error) {
 	        alert("Error. Could not read barcode."); 
-	    });
+	    });REMOVE*/
 	}
     $scope.submitPrice = function(){
         $scope.price = document.getElementById("price").value; 
@@ -106,8 +102,38 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
 
     $scope.newLocation = function(){
         $scope.showNewLocation = true; 
+        $scope.showLocation = false; 
+        $scope.submitButtons = true; 
     }
+    $scope.submitInfo = function(){ 
+        var userdata = {
+            email: USER_EMAIL,
+            product: product.barcode, 
+            price: $scope.price, 
+            store: $scope.location.id
+        }; 
+        $http({
+            method: "post", 
+            url: BASE_URL + "Data/index.php", 
+            data: userdata
+        })
+        .success(function(data){
+            console.log(data); 
+        })
+        .error(function(err){
+            console.log(err); 
+        }); 
+        $state.go("tab.product");
+    }
+    $scope.reset = function(){ 
 
+        $scope.submitButtons = false; 
+        $scope.priceEntry = true;
+        $scope.showPrice = false; 
+        $scope.location = {}; 
+        $scope.showLocation = false; 
+        $scope.showNewLocation = false; 
+    }
     var showNearby = function(){
         $ionicLoading.show(loadingOptions);
         var posOptions = {timeout: 10000, enableHighAccuracy: true};
@@ -124,8 +150,8 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                     latLong + "&key=" + API_KEY)
                         .success(function(data){
                             $ionicLoading.hide(); 
-                            $scope.results = data.results
-
+                            $scope.results = data.results; 
+                            nearbyPlaces = data.results; 
                         }).error(function(err){
                             alert(err); 
                 });
@@ -141,30 +167,32 @@ app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $ht
     $scope.imageUrl = product.imageUrl; 
     $scope.price = product.price;  
     $scope.description = product.description; 
-    $scope.showNearby = function(){
-        $ionicLoading.show(loadingOptions);
-        var posOptions = {timeout: 10000, enableHighAccuracy: true};
-        var lat; 
-        var longi; 
-        var latLong; 
-        $cordovaGeolocation
-            .getCurrentPosition(posOptions)
-            .then(function (position) {
-              lat = position.coords.latitude;
-              longi = position.coords.longitude;
-              latLong = lat + "," + longi; 
-                $http.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance&type=store&location=" +
-                    latLong + "&key=" + API_KEY)
-                        .success(function(data){
-                            $ionicLoading.hide();
-                            $scope.results = data.results
-
-                        }).error(function(err){
-                            alert(err); 
-                });
-            }, function(err) {
-              alert(err); 
+    $scope.getInfo = function(){
+        userdata = {
+            product: product.barcode
+        }
+        $http({
+            method: "post", 
+            url: BASE_URL + "Data/retrieve.php", 
+            data: userdata
+        })
+        .success(function(data){
+            compareData(data); 
+        })
+        .error(function(data, status){
+            alert("Error: " + status); 
         });
+    }
+    var compareData = function(data){
+        for(var i=0; i<data.length; i++){
+            var prices = data[i]; 
+            for(var j=0; j<nearbyPlaces.length; j++){
+                var locations = nearbyPlaces[j]; 
+                if(prices.store === locations.id){
+                    alert(prices.price + locations.name); 
+                }
+            }
+        }
     }
 }); 
 
@@ -175,6 +203,6 @@ var loadingOptions = {
     content: 'Loading',
     animation: 'fade-in',
     showBackdrop: true,
-    maxWidth: 200,
+    maxWidth: 150,
     showDelay: 0
 }

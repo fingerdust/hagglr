@@ -12,9 +12,10 @@ var accessToken = "";
 var clientId = "547116458961-7tsfii9mvd5cl5r9digh537n7vs0vqji.apps.googleusercontent.com";
 var clientSecret = "v2Oo8y7W1M1lbM66vog4Mb6F";
 var API_KEY = "AIzaSyBIgvJicny7Lult5CEGDYydJHmANgBIFxQ"
-var BASE_URL = "http://ec2-52-11-37-35.us-west-2.compute.amazonaws.com/"
+var BASE_URL = "http://www.hagglr.info/"
 var USER_EMAIL = ""; 
 var product = {}; 
+var nearbyPlaces = {}; 
 
 
 angular.module('starter', [
