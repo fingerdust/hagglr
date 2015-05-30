@@ -1,7 +1,7 @@
 <ion-view view-title="Scan a Product">
   	<ion-content ng-controller="ScannerController as scanner" class="padding">
 	    
-	    <button class="button button-block button-positive" ng-click="scanner.scanBarcode()">Scan</button>
+	    <button class="button button-block icon-right ion-ios-barcode button-positive" ng-click="scanner.scanBarcode()">Scan Item</button>
 	    
 	    <div ng-show ="infocard" class="card">
 	    	<div ng-model="pTitle" class="item item-text-wrap"> 
@@ -32,12 +32,15 @@
 	      			Location
 	    		</div>
 	    	
-				<select ng-model="location" ng-click="newLocation()" ng-options="result.name for result in results | limitTo: 6" >
+				<select ng-model="location" ng-change="newLocation()" ng-options="result.name for result in results | limitTo: 6" >
 					
 				</select>
 			</label>
 	    </div>
-
+	    <div ng-show="submitButtons">
+	    	<button class="button icon-right ion-ios-undo button-assertive" ng-click="reset()">Reset</button>
+	    	<button class="button icon-right ion-chevron-right button-balanced" ng-click="submitInfo()">Ok</button>
+	    </div>
 
 	</ion-content>
 </ion-view>
