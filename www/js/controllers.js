@@ -27,7 +27,7 @@ app.controller('AccountCtrl', function($scope, $http, $state) {
                         
                     })
                     .error(function(data, status) {
-                        alert("ERROR: " + data);
+                        console.log("ERROR: " + data);
                     });
                 ref.close();
             }
@@ -46,7 +46,7 @@ app.controller('AccountCtrl', function($scope, $http, $state) {
     			USER_EMAIL = data.data.email;              		
             })
     		.error(function(data, status){
-    			alert("ERROR:" + data); 
+    			console.log("ERROR:" + data); 
     		}); 
     }
     
@@ -57,15 +57,15 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
     product.barcode = "B00QVGFOBM"; // Remove barcode string 
 	this.scanBarcode = function() {
         
-	    /*REMOVE $cordovaBarcodeScanner.scan().then(function(imageData) {
+	    $cordovaBarcodeScanner.scan().then(function(imageData) {
             $ionicLoading.show(loadingOptions);
             $scope.reset(); 
-	    	product.barcode = imageData.text; REMOVE*/
+	    	product.barcode = imageData.text;
 	    	    $http({
                     method: "post",
                     url: BASE_URL + "Logic/amazon/index.php", 
                     data: {
-                        number: "B00QVGFOBM"
+                        number: product.barcode
                     },
                     headers: { 
                         'Content-Type': 'application/x-www-form-urlencoded'
@@ -79,6 +79,9 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                     $scope.priceEntry = true; 
                     product.imageUrl = data.imageUrl[0];
                     product.description = data.description[0]; 
+                    product.asin = data.asin[0]; 
+                    product.iframe = data.iFrameUrl[0]; 
+                    $scope.asin = product.asin; 
                     if(data.price[0] === "N"){
                         product.price = "Could not find an Amazon price for the selected item"
                     }else{
@@ -88,9 +91,9 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                 .error(function(data){
                     alert("Could not find product information"); 
                 });
-	   	/*REMOVE}, function(error) {
-	        alert("Error. Could not read barcode."); 
-	    });REMOVE*/
+	   	}, function(error) {
+	        console.log("Error. Could not read barcode."); 
+	    });
 	}
     $scope.submitPrice = function(){
         $scope.price = document.getElementById("price").value; 
@@ -108,9 +111,12 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
     $scope.submitInfo = function(){ 
         var userdata = {
             email: USER_EMAIL,
-            product: product.barcode, 
+            product: product.barcode,
+            productName: product.pTitle, 
+            amazonPrice: product.price, 
             price: $scope.price, 
             store: $scope.location.id
+
         }; 
         $http({
             method: "post", 
@@ -123,6 +129,10 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         .error(function(err){
             console.log(err); 
         }); 
+        $scope.reset(); 
+        $scope.infocard = false; 
+        $scope.priceEntry = false; 
+        localPrices = {}; 
         $state.go("tab.product");
     }
     $scope.reset = function(){ 
@@ -133,6 +143,7 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         $scope.location = {}; 
         $scope.showLocation = false; 
         $scope.showNewLocation = false; 
+        $scope.money = ''; 
     }
     var showNearby = function(){
         $ionicLoading.show(loadingOptions);
@@ -140,62 +151,128 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         var lat; 
         var longi; 
         var latLong; 
-        $cordovaGeolocation
+        /* $cordovaGeolocation
             .getCurrentPosition(posOptions)
-            .then(function (position) {
+            .then(function (position) { 
               lat = position.coords.latitude;
-              longi = position.coords.longitude;
-              latLong = lat + "," + longi; 
-                $http.get("https://maps.googleapis.com/maps/api/place/nearbysearch/json?rankby=distance&type=store&location=" +
+              longi = position.coords.longitude; 
+              latLong = lat + "," + longi; */
+
+              latLong = "53.343796,-6.2559238";
+
+                $http.get(
+                    "https://maps.googleapis.com/maps/api/place/nearbysearch/" + 
+                    "json?rankby=distance&types=book_store|" + 
+                    "electronics_store" + 
+                    "&location=" +
                     latLong + "&key=" + API_KEY)
                         .success(function(data){
                             $ionicLoading.hide(); 
                             $scope.results = data.results; 
                             nearbyPlaces = data.results; 
                         }).error(function(err){
-                            alert(err); 
-                });
+                            console.log(err); 
+                });/*
             }, function(err) {
-              alert(err); 
-        });
+              console.log(err); 
+        }); */
     }
 }); 
 
 
-app.controller("ProductController", function($scope, $cordovaBarcodeScanner, $http, $cordovaGeolocation, $ionicLoading){
-    $scope.pTitle = product.pTitle;
-    $scope.imageUrl = product.imageUrl; 
-    $scope.price = product.price;  
-    $scope.description = product.description; 
-    $scope.getInfo = function(){
-        userdata = {
-            product: product.barcode
-        }
-        $http({
-            method: "post", 
-            url: BASE_URL + "Data/retrieve.php", 
-            data: userdata
-        })
-        .success(function(data){
-            compareData(data); 
-        })
-        .error(function(data, status){
-            alert("Error: " + status); 
-        });
-    }
-    var compareData = function(data){
-        for(var i=0; i<data.length; i++){
-            var prices = data[i]; 
-            for(var j=0; j<nearbyPlaces.length; j++){
-                var locations = nearbyPlaces[j]; 
-                if(prices.store === locations.id){
-                    alert(prices.price + locations.name); 
+app.controller("ProductController", function($sce, $scope, $cordovaBarcodeScanner, $http, $cordovaGeolocation, $ionicLoading, $state){
+    
+
+        $scope.pTitle = product.pTitle;
+        $scope.imageUrl = product.imageUrl; 
+        $scope.price = product.price;  
+        $scope.description = product.description; 
+        $scope.asin = product.asin; 
+        $scope.iframe = function() {return $sce.trustAsResourceUrl(product.iframe);} 
+        
+        
+        var compareData = function(data){
+            var result = []; 
+            for(var i=0; i<data.length; i++){
+                var entry = data[i]; 
+                for(var j=0; j<nearbyPlaces.length; j++){
+                    var locations = nearbyPlaces[j]; 
+                    if(entry.store === locations.id){
+                        result.push({
+                            name: locations.name, 
+                            price: entry.price, 
+                            lat: locations.geometry.location.lat, 
+                            lng: locations.geometry.location.lng
+                        }); 
+                    }
                 }
-            }
+            } 
+            $scope.localPrices = result; 
+            
         }
-    }
+
+        $scope.setPlace = function(la, lo){ 
+            currentLat = la; 
+            currentLong = lo; 
+            $state.go('map');   
+        }
+
+        $scope.getInfo = function(){
+            userdata = {
+                product: product.barcode
+            }
+            $http({
+                method: "post", 
+                url: BASE_URL + "Data/retrieve.php", 
+                data: userdata
+            })
+            .success(function(data){
+                compareData(data); 
+                
+                  
+            })
+            .error(function(data, status){
+                
+                console.log("Error: " + status); 
+            });
+        };
+
+
+        $scope.goReviews = function(){
+
+            $state.go('reviews'); 
+        }
+
 }); 
 
+app.controller('MapController', function($scope, $ionicLoading) {
+ 
+    $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+        var myLatlng = new google.maps.LatLng(currentLat, currentLong);
+ 
+        var mapOptions = {
+            center: myLatlng,
+            zoom: 16,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+ 
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+ 
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            map.setCenter(new google.maps.LatLng(currentLat, currentLong));
+            var myLocation = new google.maps.Marker({
+                position: new google.maps.LatLng(currentLat, currentLong),
+                map: map,
+                title: "My Location"
+            });
+        });
+ 
+        $scope.map = map;
+    }); 
+
+ 
+ 
+});
 ////////////// HELPER FUNCTIONS AND SETTINGS ///////////////////
 
 
