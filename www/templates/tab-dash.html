@@ -1,6 +1,6 @@
-<ion-view view-title="Scan a Product">
+<ion-view >
   	<ion-content ng-controller="ScannerController as scanner" class="padding">
-	    
+	    <div class="spacer"></div>
 	    <button class="button button-block icon-right ion-ios-barcode button-positive" ng-click="scanner.scanBarcode()">Scan Item</button>
 	    
 	    <div ng-show ="infocard" class="card">
@@ -32,8 +32,8 @@
 	      			Location
 	    		</div>
 	    	
-				<select ng-model="location" ng-change="newLocation()" ng-options="result.name for result in results | limitTo: 6" >
-					
+				<select ng-model="location" ng-change="newLocation()" ng-options="result.name for result in results">
+					<option value="">Other</option>
 				</select>
 			</label>
 	    </div>

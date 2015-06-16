@@ -1,23 +1,44 @@
-<ion-view view-title="Product">
-  <ion-content>
+<ion-view >
+  <ion-content class="padding">
     <div ng-controller="ProductController as product">
     	<div class="list card">
-    		<div class="item item-text-wrap">
-    			<h3>{{pTitle}}</h3>
-    		</div>
     		<div class="item item-body">
-    			<img width="60%" class="full-image" ng-src="{{imageUrl}}" />
-    			<p>{{description}}</p>
-                <p>Amazon Price: {{price}}</p> 
+    			<img width="50%" class="full-image" ng-src="{{imageUrl}}" />
+    			<p>{{pTitle}}</p>
     		</div>
-
-
-<button class="button icon-right ion-chevron-right button-balanced" ng-click="getInfo()">Ok</button>
-
 
 
       
     </div>
+    <div  ng-init="getInfo()" class="list" >
+        <div class="item item-divider">
+            Amazon
+        </div>
+        <a class="item item-icon-left" href="http://www.amazon.co.uk/gp/product/{{asin}}/hagglr-21" onclick="window.open(this.href, '_blank', 'location=yes');return false;"> 
+            <i class="icon ion-bag"></i>
+            Purhase on Amazon
+            <span class="item-note">{{price}}</span>
+        </a>
+        <a class="item item-icon-left" ng-click="goReviews()" href="#">
+            <i class="icon ion-chatboxes"></i>
+            Amazon Reviews
+        </a>
+        <div class="item item-divider">
+            Local Prices
+        </div>
+ 
 
+        
+        <a ng-model="currentLoc" ng-click="setPlace(thing.lat, thing.lng);" class="item item-icon-left" href="#" ng-repeat="thing in localPrices">
+            <i class="icon ion-map"></i>
+            {{thing.name}}
+            <span class="item-note">{{thing.price}}</span>
+        </a>
+        
+
+    </div>
+    <div class="spacer">
+    </div>
+</div>
   </ion-content>
 </ion-view>
