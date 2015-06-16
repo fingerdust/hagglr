@@ -9,6 +9,7 @@ app.service("BarcodeService", function(){
   }; 
 }); 
 
+// Directive for sensible input of price. 
 app.directive('currencyInput', function() {
     return {
         restrict: 'A',

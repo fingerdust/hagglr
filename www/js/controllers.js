@@ -1,15 +1,12 @@
 var app = angular.module('starter.controllers', []); 
 
 
-app.controller('ChatsCtrl', function($scope, Chats) {
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
-  }
-}); 
 
 
 
+/* 
+    The Account controller deals with the user login via OAuth 
+*/
 app.controller('AccountCtrl', function($scope, $http, $state) {
     $http.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
  
@@ -51,16 +48,20 @@ app.controller('AccountCtrl', function($scope, $http, $state) {
     }
     
 });
-
+/*
+    The Scanner Controller deals with the barcode scanning and initial request to AWS 
+*/
 app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $state, $ionicLoading, $http, $cordovaGeolocation, $state){
     $scope.showLocationResult = false;
     product.barcode = "B00QVGFOBM"; // Remove barcode string 
 	this.scanBarcode = function() {
         
+        // Use cordova to perform the barcode scan from device camera 
 	    $cordovaBarcodeScanner.scan().then(function(imageData) {
             $ionicLoading.show(loadingOptions);
             $scope.reset(); 
 	    	product.barcode = imageData.text;
+                // Post to server which will make the AWS product request 
 	    	    $http({
                     method: "post",
                     url: BASE_URL + "Logic/amazon/index.php", 
@@ -72,6 +73,7 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                     }
                 })
                 .success(function(data) {
+                    // Now we have amazon data, set the display 
                     $ionicLoading.hide(); 
                     product.pTitle = data.title[0];
                     $scope.pTitle = product.pTitle; 
@@ -108,6 +110,10 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         $scope.showLocation = false; 
         $scope.submitButtons = true; 
     }
+
+    /*  
+        Submit the entered user info to database 
+    */ 
     $scope.submitInfo = function(){ 
         var userdata = {
             email: USER_EMAIL,
@@ -135,6 +141,9 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         localPrices = {}; 
         $state.go("tab.product");
     }
+    /*
+        Reset the display 
+    */
     $scope.reset = function(){ 
 
         $scope.submitButtons = false; 
@@ -145,21 +154,25 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
         $scope.showNewLocation = false; 
         $scope.money = ''; 
     }
+
+    /* 
+        Funtion to grab the stores near to the user 
+    */
     var showNearby = function(){
         $ionicLoading.show(loadingOptions);
         var posOptions = {timeout: 10000, enableHighAccuracy: true};
         var lat; 
         var longi; 
         var latLong; 
-        /* $cordovaGeolocation
+
+        // Use cordova to get the current device GPS location 
+        $cordovaGeolocation
             .getCurrentPosition(posOptions)
             .then(function (position) { 
               lat = position.coords.latitude;
               longi = position.coords.longitude; 
-              latLong = lat + "," + longi; */
-
-              latLong = "53.343796,-6.2559238";
-
+              latLong = lat + "," + longi; 
+                // Google Places API request 
                 $http.get(
                     "https://maps.googleapis.com/maps/api/place/nearbysearch/" + 
                     "json?rankby=distance&types=book_store|" + 
@@ -169,19 +182,23 @@ app.controller('ScannerController', function($scope, $cordovaBarcodeScanner, $st
                         .success(function(data){
                             $ionicLoading.hide(); 
                             $scope.results = data.results; 
+                            // JSON of places available globally 
                             nearbyPlaces = data.results; 
                         }).error(function(err){
                             console.log(err); 
-                });/*
+                });
             }, function(err) {
               console.log(err); 
-        }); */
+        }); 
     }
 }); 
 
-
+/*
+    The product controller deals with the places information and display of nearby places with prices 
+    by comparing current location to price/location entries in the database. 
+*/
 app.controller("ProductController", function($sce, $scope, $cordovaBarcodeScanner, $http, $cordovaGeolocation, $ionicLoading, $state){
-    
+        // 
 
         $scope.pTitle = product.pTitle;
         $scope.imageUrl = product.imageUrl; 
@@ -190,7 +207,7 @@ app.controller("ProductController", function($sce, $scope, $cordovaBarcodeScanne
         $scope.asin = product.asin; 
         $scope.iframe = function() {return $sce.trustAsResourceUrl(product.iframe);} 
         
-        
+        // Compare current location to location/price connections 
         var compareData = function(data){
             var result = []; 
             for(var i=0; i<data.length; i++){
@@ -244,7 +261,9 @@ app.controller("ProductController", function($sce, $scope, $cordovaBarcodeScanne
         }
 
 }); 
-
+/* 
+    Controller used to display target store on a map. 
+*/
 app.controller('MapController', function($scope, $ionicLoading) {
  
     $scope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
