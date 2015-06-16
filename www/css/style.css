@@ -1,1 +1,47 @@
 /* Empty. Add your own CSS if you like */
+.title {
+	background: url("../img/header.png");
+	background-size: 100% 100%; 
+	margin: 0;
+}
+.bar .title{
+	margin:0;
+	height: 51px;
+}
+.item-input-wrapper{
+	border-bottom: 1px solid #DDE;
+	background: none;
+	-ms-border-radius: 0;
+	-moz--border-radius: 0;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+}
+.item-input-inset{
+	height: auto;
+	font-size: 16px; 
+}
+iframe{
+	width: 100%;
+	min-height: 100%;
+	border: none;
+	overflow-x: hidden;
+}
+ìon-header-bar{
+	height: 51px;
+}
+.button.button-positive{
+	border-color: #F01D7B ;
+	background-color: #F01D7B ; 
+	margin-top: 30px;
+}
+.scroll {
+    height: 100%;
+}
+ 
+#map {
+    width: 100%;
+    height: 100%;
+}
+.spacer{
+	height: 50px; 
+}
