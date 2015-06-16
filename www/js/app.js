@@ -16,7 +16,9 @@ var BASE_URL = "http://www.hagglr.info/"
 var USER_EMAIL = ""; 
 var product = {}; 
 var nearbyPlaces = {}; 
-
+var localPrices = {}; 
+var currentLat; 
+var currentLong; 
 
 angular.module('starter', [
                             'ionic', 
@@ -74,15 +76,6 @@ angular.module('starter', [
         }
       }
     })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
 
   .state('tab.account', {
     url: '/account',
@@ -92,6 +85,17 @@ angular.module('starter', [
         controller: 'AccountCtrl'
       }
     }
+  })
+
+  .state('reviews', {
+    url: '/reviews', 
+    templateUrl: 'templates/reviews.html'
+      
+  })
+
+  .state('map', {
+    url: '/map', 
+    templateUrl: 'templates/map.html'
   });
 
   // if none of the above states are matched, use this as the fallback
